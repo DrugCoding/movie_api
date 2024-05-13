@@ -134,14 +134,14 @@ public class MovieService {
                 .block();
     }
 
-    // 검색 영화 리스트 출력
+    // 검색(제목:title) 영화 리스트 출력
     public List<Movie> listMovies(String title) {
 
         return movieRepository.findByTitleContaining(title);
 
     }
 
-    // 검색(아이디) 영화 반환
+    // 검색(아이디:id) 영화 출력
     public Movie oneMovie(Long id) {
 
         return movieRepository.findById(id).orElse(null);
