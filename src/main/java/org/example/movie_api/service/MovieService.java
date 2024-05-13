@@ -135,12 +135,16 @@ public class MovieService {
     }
 
     // 검색 영화 리스트 출력
-//    public List<Movie> listMovies() {
-//        return movieRepository.findAllById();
-//    }
+    public List<Movie> listMovies(String title) {
+
+        return movieRepository.findByTitleContaining(title);
+
+    }
 
     // 검색(아이디) 영화 반환
     public Movie oneMovie(Long id) {
+
         return movieRepository.findById(id).orElse(null);
+
     }
 }
