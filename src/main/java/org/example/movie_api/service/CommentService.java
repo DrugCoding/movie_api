@@ -44,4 +44,11 @@ public class CommentService {
         return commentRepository.save(comment);
 
     }
+
+    // 댓글 삭제
+    public void deleteComment(Long id) {
+
+        commentRepository.deleteById(id);
+
+    }
 }

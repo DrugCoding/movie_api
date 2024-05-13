@@ -28,12 +28,24 @@ public class CommentController {
     // 댓글 확인 id로
     @GetMapping("/detail/{id}")
     public Comment commentDetail(@PathVariable Long id) {
+
         return commentService.detailOne(id);
+
     }
 
     // 댓글 수정
     @PostMapping("/update/{id}")
     public Comment commentUpdate(@PathVariable Long id, @RequestBody CommentDto commentDto) {
+
         return commentService.updateComment(id, commentDto);
+
+    }
+
+    // 댓글 삭제
+    @GetMapping("/delete/{id}")
+    public void commentDelete(@PathVariable Long id) {
+
+        commentService.deleteComment(id);
+
     }
 }
