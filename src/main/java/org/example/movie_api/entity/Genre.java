@@ -17,9 +17,4 @@ public class Genre {
     private int id;
     private String name;
 
-//    public Genre(int id, String name) {
-//        this.id = id;   // 이 줄이 인스턴스 변수 'id'에 값을 할당합니다.
-//        this.name = name; // 이 줄이 인스턴스 변수 'name'에 값을 할당합니다.
-//    }
-
 }

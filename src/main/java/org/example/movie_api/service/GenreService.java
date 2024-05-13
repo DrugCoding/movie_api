@@ -13,13 +13,18 @@ import java.util.List;
 @Service
 public class GenreService {
 
+    private final WebClient webClient;
     private final GenreRepository genreRepository;
 
-    public GenreService(GenreRepository genreRepository) {
+    public GenreService(WebClient.Builder webClientBuilder, GenreRepository genreRepository) {
+        this.webClient = webClientBuilder
+                .baseUrl("https://api.themoviedb.org/3")
+                .defaultHeader("Authorization", "Bearer 990200730d414287e2bf9f9f147baca7")
+                .build();
         this.genreRepository = genreRepository;
     }
 
-    private WebClient webClient = WebClient.create("https://api.themoviedb.org/3");
+//    private WebClient webClient = WebClient.create("https://api.themoviedb.org/3");
 
     public void saveGenre() {
         List<GenreDto> genres = webClient.get()
@@ -31,15 +36,6 @@ public class GenreService {
                 .bodyToMono(GenreListResponse.class)
                 .block()
                 .getGenres();
-//                .retrieve()
-//                .bodyToFlux(GenreDto.class)
-//                .collectList()
-//                .block();
-
-//        for (GenreDto genre : genres) {
-//            Genre entity = new Genre(genre.getId(), genre.getName());
-//            genreRepository.save(entity);
-//        }
 
         for (GenreDto genre : genres) {
             Genre genre1 = new Genre();

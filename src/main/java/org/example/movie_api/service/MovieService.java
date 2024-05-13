@@ -1,69 +1,140 @@
 package org.example.movie_api.service;
 
-import jakarta.transaction.Transactional;
 import org.example.movie_api.dto.MovieDto;
+import org.example.movie_api.entity.Genre;
 import org.example.movie_api.entity.Movie;
+import org.example.movie_api.repository.GenreRepository;
 import org.example.movie_api.repository.MovieRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieService {
 
+    private final WebClient webClient;
     private final MovieRepository movieRepository;
-    private final RestTemplate restTemplate;
+    private final GenreRepository genreRepository;
 
-//    private final String API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5OTAyMDA3MzBkNDE0Mjg3ZTJiZjlmOWYxNDdiYWNhNyIsInN1YiI6IjYyZGEyODI1YjM5ZTM1MDA2NzY3NTA3NCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.E9Xk9fdU9pIRV2hkhURuDxEzZok2vEcjtVY5FWScrIQ";
-//    private final String URL = "https://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&language=en-US&page=1";
+    private Map<Integer, String> genreMap;
 
-    public MovieService(MovieRepository movieRepository, RestTemplate restTemplate) {
+    public MovieService(MovieRepository movieRepository, WebClient.Builder webClientBuilder, GenreRepository genreRepository) {
+        this.webClient =  webClientBuilder
+                .baseUrl("https://api.themoviedb.org/3")
+                .defaultHeader("Authorization", "Bearer 990200730d414287e2bf9f9f147baca7")
+                .build();
         this.movieRepository = movieRepository;
-        this.restTemplate = restTemplate;
+        this.genreRepository = genreRepository;
+        loadGenreMap();
     }
 
+    private void loadGenreMap() {
+        genreMap = genreRepository
+                .findAll()
+                .stream()
+                .collect(Collectors.toMap(Genre::getId, Genre::getName));
+    }
 
-//    public void fetchAndStoreMovies() {
-//        MovieDto[] movies = restTemplate.getForObject(URL, MovieDto[].class);
-//        if (movies != null) {
-//            for (MovieDto movieDto : movies) {
-//                Movie movie = convertToEntity(movieDto);
-//                movieRepository.save(movie);
-//            }
-//        }
-//    }
-
-    private Movie convertToEntity(MovieDto dto) {
+    private Movie convertToEntity(MovieDto movieDto) {
+        // 새로운 Movie는 Movie를 반환하고 movie라고 선언한다.
         Movie movie = new Movie();
-        movie.setGenre_id(dto.getGenre_id());
-        movie.setTitle(dto.getTitle());
-        movie.setOriginal_title(dto.getOriginal_title());
-        movie.setRelease_date(dto.getRelease_date());
-        movie.setPoster_path(dto.getPoster_path());
-        movie.setOverview(dto.getOverview());
+        // genre_ids 저장
+        String genre_ids = movieDto.getGenre_ids().stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
+        movie.setGenre_ids(genre_ids);
+
+        movie.setId(movieDto.getId());
+        // movie에 movieDto의 title을 호출하여 담아서 저장한다.
+        movie.setTitle(movieDto.getTitle());
+        movie.setOriginal_title(movieDto.getOriginal_title());
+        movie.setRelease_date(movieDto.getRelease_date());
+        movie.setPoster_path(movieDto.getPoster_path());
+
+        // overview 저장 3항 연산자 사용
+        // movieDto의 Overview를 가져온 값이 null이 아니라면 getOverview를 호출한 값을 overview에 넣고 아니면 "데이터가 없습니다"를 넣는다.
+        String overview = movieDto.getOverview() != null ? movieDto.getOverview() : "데이터가 없습니다";
+        // String 타입 255제한
+        // overview의 길이가 255보다 길다면
+        if (overview.length() > 255) {
+            // substring(문자열 자르는 메소드) 0부터 249번째까지 잘라 ... 을 더해서 overview에 저장
+            overview = overview.substring(0, 249) + "...";
+        }
+        // overview를 담아 movie의 Overview에 저장
+        movie.setOverview(overview);
+
         return movie;
     }
 
-    //    @Transactional
-//    public void fetchAndStoreMovies() {
-//        try {
-//            MovieDto[] response = restTemplate.getForObject(URL, MovieDto[].class);
-//            Optional.ofNullable(response)
-//                    .ifPresent(movies -> Arrays.stream(movies).forEach(movieDto -> {
-//                        Movie movie = convertToEntity(movieDto);
-//                        movieRepository.save(movie);
-//                    }));
-//        } catch (RestClientException e) {
-//            // 외부 API 호출 실패
-//            System.err.println("Failed to fetch data from TMDB: " + e.getMessage());
-//            throw new RuntimeException("Failed to fetch data from TMDB", e);
-//        } catch (Exception e) {
-//            // 데이터베이스 오류 또는 기타 오류
-//            System.err.println("An error occurred: " + e.getMessage());
-//            throw new RuntimeException("Error during database operation", e);
-//        }
-//    }
+    // 인기영화 api 저장
+    // popular movie 데이터 호출
+    private Mono<List<MovieDto>> popularMoviePages(int page) {
+        return webClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/movie/popular")
+                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
+                        .queryParam("language", "ko")
+                        .build())
+                .retrieve()
+                .bodyToMono(MovieDto.MovieListResponse.class)
+                .map(MovieDto.MovieListResponse::getResults);
+    }
+
+    // popula rmovie 데이터 저장
+    public void savePopularMovies() {
+        // 1~100 페이지
+        Flux
+                .range(1, 100)
+                .flatMap(this::popularMoviePages)
+                .flatMap(Flux::fromIterable)
+                .map(this::convertToEntity)
+                .collectList()
+                .doOnNext(movieRepository::saveAll)
+                .block();
+    }
+
+    // 상영중인영화 페이지 저장
+    // now playing movie 데이터 호출
+    private Mono<List<MovieDto>> nowPlayingMovie(int page) {
+        return webClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/movie/now_playing")
+                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
+                        .queryParam("language", "ko")
+                        .queryParam("page", page)
+                        .build())
+                .retrieve()
+                .bodyToMono(MovieDto.MovieListResponse.class)
+                .map(MovieDto.MovieListResponse::getResults);
+    }
+
+    // now playing movie 데이터 저장
+    public void saveNowPlayingMovies() {
+        Set<Long> inMovieData = new HashSet<>(movieRepository.findAll()
+                .stream()
+                .map(Movie::getId)
+                .collect(Collectors.toList()));
+
+        Flux
+                .range(1, 100)
+                .flatMap(this::nowPlayingMovie)
+                .flatMap(Flux::fromIterable)
+                .filter(movieDto -> !inMovieData.contains(movieDto.getId().toString()))
+                .map(this::convertToEntity)
+                .collectList()
+                .doOnNext(movieRepository::saveAll)
+                .block();
+    }
+
+    // 검색 영화 리스트 출력
+    public List<Movie> listMovies() {
+
+    }
 }
