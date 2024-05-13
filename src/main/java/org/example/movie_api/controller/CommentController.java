@@ -31,4 +31,9 @@ public class CommentController {
         return commentService.detailOne(id);
     }
 
+    // 댓글 수정
+    @PostMapping("/update/{id}")
+    public Comment commentUpdate(@PathVariable Long id, @RequestBody CommentDto commentDto) {
+        return commentService.updateComment(id, commentDto);
+    }
 }

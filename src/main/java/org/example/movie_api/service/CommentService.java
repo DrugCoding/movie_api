@@ -29,6 +29,19 @@ public class CommentService {
 
     // 댓글 한개 조회
     public Comment detailOne(Long id) {
+
         return commentRepository.findById(id).orElse(null);
+
+    }
+
+    // 댓글 수정
+    public Comment updateComment(Long id, CommentDto commentDto) {
+
+        Comment comment = detailOne(id);
+        comment.setUsername(commentDto.getUsername());
+        comment.setContent(commentDto.getContent());
+
+        return commentRepository.save(comment);
+
     }
 }
