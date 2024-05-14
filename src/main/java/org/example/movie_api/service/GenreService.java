@@ -19,17 +19,16 @@ public class GenreService {
     public GenreService(WebClient.Builder webClientBuilder, GenreRepository genreRepository) {
         this.webClient = webClientBuilder
                 .baseUrl("https://api.themoviedb.org/3")
-                .defaultHeader("Authorization", "Bearer 990200730d414287e2bf9f9f147baca7")
+                .defaultHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5OTAyMDA3MzBkNDE0Mjg3ZTJiZjlmOWYxNDdiYWNhNyIsInN1YiI6IjYyZGEyODI1YjM5ZTM1MDA2NzY3NTA3NCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.E9Xk9fdU9pIRV2hkhURuDxEzZok2vEcjtVY5FWScrIQ")
                 .build();
         this.genreRepository = genreRepository;
     }
 
 //    private WebClient webClient = WebClient.create("https://api.themoviedb.org/3");
 
-    public void saveGenre() {
+    public String saveGenre() {
         List<GenreDto> genres = webClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/genre/movie/list")
-                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
                         .queryParam("language", "ko")
                         .build())
                 .retrieve()
@@ -43,5 +42,8 @@ public class GenreService {
             genre1.setName(genre.getName());
             genreRepository.save(genre1);
         }
+
+        return "genre 데이터 저장완료";
+
     }
 }

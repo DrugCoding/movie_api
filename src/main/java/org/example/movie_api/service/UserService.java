@@ -23,6 +23,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+
     // 회원가입 (비밀번호 암호화)
     public String saveSignup(UserDto userDto, HttpSession httpSession) {
 
@@ -56,6 +57,7 @@ public class UserService {
         return "회원가입 성공";
 
     }
+
 
     // 로그인
     public String login(UserDto userDto, HttpSession httpSession) {
@@ -92,6 +94,7 @@ public class UserService {
 
         }
 
+
     // 로그아웃
     public String logoutUser(HttpSession httpSession) {
 
@@ -106,6 +109,7 @@ public class UserService {
         return "로그아웃 완료";
 
     }
+
 
     // 회원탈퇴
     public String saveDelete(String username, HttpSession httpSession) {

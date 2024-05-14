@@ -80,7 +80,6 @@ public class MovieService {
         return webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/movie/popular")
-//                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
                         .queryParam("language", "ko")
                         .queryParam("page", page)
                         .build())
@@ -108,7 +107,6 @@ public class MovieService {
         return webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/movie/now_playing")
-//                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
                         .queryParam("language", "ko")
                         .queryParam("page", page)
                         .build())
