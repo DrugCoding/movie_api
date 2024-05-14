@@ -27,7 +27,7 @@ public class MovieService {
     private Map<Integer, String> genreMap;
 
     public MovieService(MovieRepository movieRepository, WebClient.Builder webClientBuilder, GenreRepository genreRepository) {
-        this.webClient =  webClientBuilder
+        this.webClient = webClientBuilder
                 .baseUrl("https://api.themoviedb.org/3")
                 .defaultHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5OTAyMDA3MzBkNDE0Mjg3ZTJiZjlmOWYxNDdiYWNhNyIsInN1YiI6IjYyZGEyODI1YjM5ZTM1MDA2NzY3NTA3NCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.E9Xk9fdU9pIRV2hkhURuDxEzZok2vEcjtVY5FWScrIQ")
                 .build();
@@ -162,8 +162,10 @@ public class MovieService {
         return movieRepository.findById(id).orElse(null);
 
     }
+}
 
-    //    private Movie convertToEntity(MovieDto movieDto) {
+//// 바꾸기전 코드 : 코드의 재사용성과 유지 보수성은 이게 더 좋다. 바꾼코드는 직관성이 좋다. 이해하기 좋음.
+//    private Movie convertToEntity(MovieDto movieDto) {
 //        // 새로운 Movie는 Movie를 반환하고 movie라고 선언한다.
 //        Movie movie = new Movie();
 //        // genre_ids 저장
@@ -219,6 +221,8 @@ public class MovieService {
 //                .collectList()
 //                .doOnNext(movieRepository::saveAll)
 //                .block();
+//    }
+//
 //    // 상영중인영화 페이지 저장
 //    // now playing movie 데이터 호출
 //    private Mono<List<MovieDto>> nowPlayingMovie(int page) {
@@ -250,5 +254,3 @@ public class MovieService {
 //                .doOnNext(movieRepository::saveAll)
 //                .block();
 //    }
-//    }
-}
