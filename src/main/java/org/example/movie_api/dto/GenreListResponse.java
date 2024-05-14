@@ -12,7 +12,8 @@ public class GenreListResponse {
     private List<GenreDto> genres;
 
     public List<GenreDto> getGenres() {
-        return genres;
-    }
 
+        return genres;
+
+    }
 }

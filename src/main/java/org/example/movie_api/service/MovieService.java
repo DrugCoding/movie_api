@@ -29,7 +29,7 @@ public class MovieService {
     public MovieService(MovieRepository movieRepository, WebClient.Builder webClientBuilder, GenreRepository genreRepository) {
         this.webClient =  webClientBuilder
                 .baseUrl("https://api.themoviedb.org/3")
-                .defaultHeader("Authorization", "Bearer 990200730d414287e2bf9f9f147baca7")
+                .defaultHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5OTAyMDA3MzBkNDE0Mjg3ZTJiZjlmOWYxNDdiYWNhNyIsInN1YiI6IjYyZGEyODI1YjM5ZTM1MDA2NzY3NTA3NCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.E9Xk9fdU9pIRV2hkhURuDxEzZok2vEcjtVY5FWScrIQ")
                 .build();
         this.movieRepository = movieRepository;
         this.genreRepository = genreRepository;
@@ -80,8 +80,9 @@ public class MovieService {
         return webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/movie/popular")
-                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
+//                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
                         .queryParam("language", "ko")
+                        .queryParam("page", page)
                         .build())
                 .retrieve()
                 .bodyToMono(MovieDto.MovieListResponse.class)
@@ -107,7 +108,7 @@ public class MovieService {
         return webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/movie/now_playing")
-                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
+//                        .queryParam("api_key", "990200730d414287e2bf9f9f147baca7")
                         .queryParam("language", "ko")
                         .queryParam("page", page)
                         .build())
@@ -127,7 +128,7 @@ public class MovieService {
                 .range(1, 100)
                 .flatMap(this::nowPlayingMovie)
                 .flatMap(Flux::fromIterable)
-                .filter(movieDto -> !inMovieData.contains(movieDto.getId().toString()))
+                .filter(movieDto -> !inMovieData.contains(movieDto.getId()))
                 .map(this::convertToEntity)
                 .collectList()
                 .doOnNext(movieRepository::saveAll)

@@ -6,10 +6,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GenreDto {
+public class UserDto {
 
-    private int id;
-    private String name;
+    private String username;
+    private String password;
 
 }
-
