@@ -40,10 +40,11 @@ public class UserController {
     public String logout(HttpSession httpSession) {
 
         return userService.logoutUser(httpSession);
+
     }
 
     // 회원탈퇴
-    @GetMapping("/delete/{username}")
+    @DeleteMapping("/delete/{username}")
     public String deleteUser(@PathVariable String username, HttpSession httpSession) {
 
         return userService.saveDelete(username, httpSession);

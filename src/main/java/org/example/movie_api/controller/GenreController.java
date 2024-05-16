@@ -16,9 +16,11 @@ public class GenreController {
         this.genreService = genreService;
     }
 
-    @GetMapping("/update")
+
+    @GetMapping("/save_genre")
     public String updateGenres() {
-        genreService.saveGenre();
-        return "성공!";
+
+        return genreService.saveGenre();
+
     }
 }

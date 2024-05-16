@@ -17,7 +17,7 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping("/popular")
+    @GetMapping("/save_popular")
     public String popularMovies() {
 
         movieService.savePopularMovies();
@@ -25,7 +25,7 @@ public class MovieController {
         return "popular movies...저장성공!";
     }
 
-    @GetMapping("/playing")
+    @GetMapping("/save_playing")
     public String nowPlayingMovie() {
 
         movieService.saveNowPlayingMovies();
