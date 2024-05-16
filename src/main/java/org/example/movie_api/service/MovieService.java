@@ -3,6 +3,7 @@ package org.example.movie_api.service;
 import jakarta.persistence.Id;
 import org.example.movie_api.dto.MovieDto;
 import org.example.movie_api.dto.MovieListResponse;
+import org.example.movie_api.dto.MovieSearchDto;
 import org.example.movie_api.entity.Genre;
 import org.example.movie_api.entity.Movie;
 import org.example.movie_api.repository.GenreRepository;
@@ -156,9 +157,15 @@ public class MovieService {
     }
 
     // 검색(제목:title) 영화 리스트 출력
-    public List<Movie> listMovies(String title) {
-
-        return movieRepository.findByTitleContaining(title);
+    public List<MovieSearchDto> listMovies(String title) {
+        // title을 포함하는 모든 영화를 조회
+        return movieRepository.findByTitleContaining(title)
+                // 조회결과를 스트림
+                .stream()
+                // movie를 MovieSearchDto 객체로 변환
+                .map(movie -> new MovieSearchDto(movie.getId(), movie.getTitle(), movie.getRelease_date()))
+                // 변환한 MovieSearchDto를 list로 수집
+                .collect(Collectors.toList());
 
     }
 
