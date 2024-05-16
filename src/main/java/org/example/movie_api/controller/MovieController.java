@@ -1,6 +1,7 @@
 package org.example.movie_api.controller;
 
 
+import org.example.movie_api.dto.MovieSearchDto;
 import org.example.movie_api.entity.Movie;
 import org.example.movie_api.service.MovieService;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class MovieController {
 
     // 영화제목 검색하면 리스트로 반환
     @GetMapping("/search_list")
-    public List<Movie> searchMoviesList(@RequestParam String title) {
+    public List<MovieSearchDto> searchMoviesList(@RequestParam String title) {
 
         return movieService.listMovies(title);
 
