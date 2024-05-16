@@ -21,17 +21,17 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signup")
-    public String signupUser(@RequestBody UserDto userDto, HttpSession httpSession) {
+    public String signupUser(@RequestParam String username, @RequestParam String password, HttpSession httpSession) {
 
-        return userService.saveSignup(userDto, httpSession);
+        return userService.saveSignup(username, password, httpSession);
 
     }
 
     // 로그인
     @PostMapping("/login")
-    public String logincheck(@RequestBody UserDto userDto, HttpSession httpSession) {
+    public String logincheck(@RequestParam String username, @RequestParam String password, HttpSession httpSession) {
 
-        return userService.login(userDto, httpSession);
+        return userService.login(username, password, httpSession);
 
     }
 

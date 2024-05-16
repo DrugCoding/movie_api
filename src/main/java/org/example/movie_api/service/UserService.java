@@ -25,7 +25,7 @@ public class UserService {
 
 
     // 회원가입 (비밀번호 암호화)
-    public String saveSignup(UserDto userDto, HttpSession httpSession) {
+    public String saveSignup(String username, String password, HttpSession httpSession) {
 
         // httpSession 값 존재여부 확인(로그인 상태에서 회원가입 막기)
         // httpsession의 속성 값이 null이 아니라면,
@@ -40,9 +40,9 @@ public class UserService {
 
         // Optional 값이 있을수도 없을수도 있는 객체 포장
         // userDto의 username을 담아 userrepository의 findById를 호출하여 Optional타입이라고 선업하고 userdata라고 선언한다.
-        Optional<User> userdata = userRepository.findById(userDto.getUsername());
+        Optional<User> userdata = userRepository.findById(username);
 
-        // userdata 객체가 비어있을 경우 아래 글 반환
+        // userdata 객체가 존재 할 경우 아래 글 반환
         if (userdata.isPresent()) {
 
             return "아이디 중복입니다 다시 해주세요";
@@ -50,8 +50,8 @@ public class UserService {
         }
 
         // 아니라면 아래 실행
-        user.setUsername(userDto.getUsername());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
 
         return "회원가입 성공";
@@ -60,10 +60,10 @@ public class UserService {
 
 
     // 로그인
-    public String login(UserDto userDto, HttpSession httpSession) {
+    public String login(String username, String password, HttpSession httpSession) {
 
         // 기존 userRepository에서 username을 가져온다
-        User user = userRepository.findById(userDto.getUsername()).orElse(null);
+        User user = userRepository.findById(username).orElse(null);
 
         // 아이디 존재 체크
         // user 가 null fail 리턴
@@ -73,12 +73,12 @@ public class UserService {
 
         // 아이디 있고, 비밀번호 일치 체크
         // 받아온 userDto의 username과 userrepository에 있는 username이 매치하지 않으면(!) fail 리턴
-        if (!passwordEncoder.matches(userDto.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             return "fail";
         }
 
-        // 통과하면 user에서 가져온 username을 result로 선언
-        String result = user.getUsername();
+        // 통과하면 받아온 username을 result로 선언
+        String result = username;
 
         // 만약 result가 "fail" 또는 null 이라면 httpSession에 fail를 속성에 추가 useme로 사용
         if (Objects.equals(result, "fail")) {
