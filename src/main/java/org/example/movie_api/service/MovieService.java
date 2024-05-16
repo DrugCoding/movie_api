@@ -2,6 +2,7 @@ package org.example.movie_api.service;
 
 import jakarta.persistence.Id;
 import org.example.movie_api.dto.MovieDto;
+import org.example.movie_api.dto.MovieListResponse;
 import org.example.movie_api.entity.Genre;
 import org.example.movie_api.entity.Movie;
 import org.example.movie_api.repository.GenreRepository;
@@ -33,15 +34,16 @@ public class MovieService {
                 .build();
         this.movieRepository = movieRepository;
         this.genreRepository = genreRepository;
-        loadGenreMap();
+//        loadGenreMap();
     }
 
-    private void loadGenreMap() {
-        genreMap = genreRepository
-                .findAll()
-                .stream()
-                .collect(Collectors.toMap(Genre::getId, Genre::getName));
-    }
+//    // movie table에 id가 장르명으로 들어가게
+//    private void loadGenreMap() {
+//        genreMap = genreRepository
+//                .findAll()
+//                .stream()
+//                .collect(Collectors.toMap(Genre::getId, Genre::getName));
+//    }
 
     public String savePopularMovies() {
         // movieRepository에서 모든 영화 목록 조회, 결과에서 각 영화의 ID추출 set<Long>형태로 변환후 inMovieData로 선언
@@ -50,6 +52,7 @@ public class MovieService {
                 .map(Movie::getId)
                 .collect(Collectors.toList()));
         // 1개가 넘어가는 여러개의 리스트
+        // 여러 데이터를 비동기적으로 저장하고 처리할 때 사용
         Flux
                 // param(page)에 이용 될 정보 1~100까지 숫자 생성
                 .range(1, 100)
@@ -60,13 +63,16 @@ public class MovieService {
                                 .queryParam("language", "ko")
                                 .queryParam("page", page)
                                 .build())
-                        // retrieve 메소드 서버로부터 응답을 가져옴
+                        // http에 요청하는 메소드 (mono 또는 flux 반환)
                         .retrieve()
-                        .bodyToMono(MovieDto.MovieListResponse.class)
-                        .map(MovieDto.MovieListResponse::getResults))
+                        // 여러데이터를 하나의 객체로 묶고 있어서 Mono
+                        .bodyToMono(MovieListResponse.class)
+                        .map(MovieListResponse::getResults))
+                // Flux로 이미 여러개이기 때문에 (Flux=flatMap, Mono=flatMapMany
                 .flatMap(Flux::fromIterable)
                 // 가져온 데이터에 조회하고있는(movieDto.getId) 것이 없다면, 진행중인 movieDto 다음단계로 진행
                 .filter(movieDto -> !inMovieData.contains(movieDto.getId()))
+                // movieDto에서 데이터를 추출하여 {}안의 과정을 반복 (map 입력받아 다른형태로 변환하는 함수, 원본데이터 변경하지 않고 새로운데이터 생성, 여러번사용하여 순차적으로적용 가능)
                 .map(movieDto -> {
                     Movie movie = new Movie();
                     String genre_ids = movieDto.getGenre_ids().stream()
@@ -115,8 +121,8 @@ public class MovieService {
                                 .build())
                         // retrieve 메소드 서버로부터 응답을 가져옴
                         .retrieve()
-                        .bodyToMono(MovieDto.MovieListResponse.class)
-                        .map(MovieDto.MovieListResponse::getResults))
+                        .bodyToMono(MovieListResponse.class)
+                        .map(MovieListResponse::getResults))
                 .flatMap(Flux::fromIterable)
                 // 가져온 데이터에 조회하고있는(movieDto.getId) 것이 없다면, 진행중인 movieDto 다음단계로 진행
                 .filter(movieDto -> !inMovieData.contains(movieDto.getId()))
