@@ -3,6 +3,7 @@ package org.example.movie_api.user.controller;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
+import org.example.movie_api.user.dto.UserDto;
 import org.example.movie_api.user.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,9 +20,10 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signup")
-    public String signupUser(@RequestParam String username, @RequestParam String password, HttpSession httpSession) {
-
-        return userService.saveSignup(username, password, httpSession);
+    public String signupUser(@ModelAttribute UserDto userDto, HttpSession httpSession) {
+//        System.out.println("username = " + userDto.getUsername());
+//        System.out.println("password = " + userDto.getPassword());
+        return userService.saveSignup(userDto, httpSession);
 
     }
 

@@ -3,6 +3,7 @@ package org.example.movie_api.user.service;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
+import org.example.movie_api.user.dto.UserDto;
 import org.example.movie_api.user.entity.User;
 import org.example.movie_api.user.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +20,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     // 회원가입 (비밀번호 암호화)
-    public String saveSignup(String username, String password, HttpSession httpSession) {
+    public String saveSignup(UserDto userDto, HttpSession httpSession) {
 
         // httpSession 값 존재여부 확인(로그인 상태에서 회원가입 막기)
         // httpsession의 속성 값이 null이 아니라면,
@@ -29,12 +30,9 @@ public class UserService {
 
         }
 
-        // 새로운 User는 User타입이고 user라고 선언한다.
-        User user = new User();
-
         // Optional 값이 있을수도 없을수도 있는 객체 포장
         // userDto의 username을 담아 userrepository의 findById를 호출하여 Optional타입이라고 선업하고 userdata라고 선언한다.
-        Optional<User> userdata = userRepository.findById(username);
+        Optional<User> userdata = userRepository.findById(userDto.getUsername());
 
         // userdata 객체가 존재 할 경우 아래 글 반환
         if (userdata.isPresent()) {
@@ -43,9 +41,12 @@ public class UserService {
 
         }
 
+        // 새로운 User는 User타입이고 user라고 선언한다.
+        User user = new User();
+
         // 아니라면 아래 실행
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
+        user.setUsername(userDto.getUsername());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userRepository.save(user);
 
         return "회원가입 성공";
