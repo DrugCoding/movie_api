@@ -26,18 +26,33 @@ public class MovieService {
 
     public String savePopularMovies() {
 
-        Set<Long> inMovieData = new HashSet<>(movieRepository.findAll()
-                .stream()
-                .map(Movie::getId)
-                .collect(Collectors.toList()));
+//        // stream 문법
+//        Set<Long> inMovieData = new HashSet<>(movieRepository.findAll()
+//                .stream()
+//                .map(Movie::getId)
+//                .collect(Collectors.toList()));
 
-        List<Movie> popularMovieList = new ArrayList<>();
+//        // 일반 반복문 코드 (list, set) ***
+//        // allMovies 라는 빈 Movie의 리스트에 movierepository에서 모두 찾아 넣는다.
+//        List<Movie> allMovies = movieRepository.findAll();
+//        // 새로운 hashset을 만들고 inMovieData라고 선언한다. (hashset은 중복 값이 들어가지 않는다)
+//        Set<Long> inMovieData = new HashSet<>();
+//
+//        // allMovies의 Movie 객체를 하나씩 가져와 movie라고 선언
+//        for (Movie movie : allMovies) {
+//            // 위에 만들어 놓은 inMovieData에 movie의 id를 기준으로 추가(id가 겹치면 저장되지 않음)
+//            inMovieData.add(movie.getId());
+//        }
+//        // #이로써 inMovieData 에는 겹치지 않는 movie들로만 구성되어있음.
+
+        // 위의 과정도 필요한가? 아래 코드에서 저장된것에 있으면 넘어가는 코드기에 그냥 전체 리스트만 불러와도 되지 않을까? 한줄만 적어도 되지 않을까?
+        List<Movie> inMovieData = movieRepository.findAll();
 
         // 1~100페이지 for반복문 처리
         for (int page = 1; page <= 100; page++) {
             int finalPage = page;
             // 페이지 번호에 동기적으로 GET 요청
-            MovieListResponse response = webClient
+            MovieListResponse popularApiList = webClient
                     .get()
                     .uri(uriBuilder -> uriBuilder.path("/movie/popular")
                             .queryParam("language", "ko")
@@ -46,8 +61,8 @@ public class MovieService {
                     .retrieve()
                     .bodyToMono(MovieListResponse.class)
                     .block(); // 동기적인 호출
-            if (response != null) {
-                for (MovieDto movieDto : response.getMovies()) {
+            if (popularApiList != null) {
+                for (MovieDto movieDto : popularApiList.getMovies()) {
                     // 가져온 데이터에 조회하고 있는(movieDto.getId) 것이 없다면, 진행중인 movieDto 다음 단계로 진행
                     if (!inMovieData.contains(movieDto.getId())) {
                         Movie movie = new Movie();
@@ -67,12 +82,11 @@ public class MovieService {
                         }
                         movie.setOverview(overview);
 
-                        popularMovieList.add(movie);
+                        movieRepository.save(movie);
                     }
                 }
             }
         }
-        movieRepository.saveAll(popularMovieList);
 
         return "popular movies 저장완료";
 
@@ -91,7 +105,7 @@ public class MovieService {
         for (int page = 1; page <= 100; page++) {
             int finalPage = page;
             // 페이지 번호에 동기적으로 GET 요청
-            MovieListResponse response = webClient
+            MovieListResponse playingApiList = webClient
                     .get()
                     .uri(uriBuilder -> uriBuilder.path("/movie/now_playing")
                             .queryParam("language", "ko")
@@ -100,8 +114,8 @@ public class MovieService {
                     .retrieve()
                     .bodyToMono(MovieListResponse.class)
                     .block(); // 동기적인 호출
-            if (response != null) {
-                for (MovieDto movieDto : response.getMovies()) {
+            if (playingApiList != null) {
+                for (MovieDto movieDto : playingApiList.getMovies()) {
                     // 가져온 데이터에 조회하고 있는(movieDto.getId) 것이 없다면, 진행중인 movieDto 다음 단계로 진행
                     if (!inMovieData.contains(movieDto.getId())) {
                         Movie movie = new Movie();
@@ -122,10 +136,13 @@ public class MovieService {
                         movie.setOverview(overview);
 
                         nowPlayingMovieList.add(movie);
+
                     }
                 }
             }
+
         }
+
         movieRepository.saveAll(nowPlayingMovieList);
 
         return "now_playing movies 저장완료";
