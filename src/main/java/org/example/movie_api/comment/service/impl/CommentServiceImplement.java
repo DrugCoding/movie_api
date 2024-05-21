@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -35,27 +37,85 @@ public class CommentServiceImplement implements CommentService {
     }
 
     // 댓글 한개 조회
-    public Comment detailOne(Long id) {
+    // orElse(null)사용 comment가 값을 포함하고있으면 값 아닐경우 null 반환.
+    @Override
+    public ResponseEntity<CommentDto> detailOne(Long id) {
 
-        return commentRepository.findById(id).orElse(null);
+        Comment comment = commentRepository.findById(id).orElse(null);
 
+        if (comment != null) {
+            CommentDto detailCommentDto = new CommentDto();
+            detailCommentDto.setUsername(comment.getUsername());
+            detailCommentDto.setContent(comment.getContent());
+
+            return ResponseEntity.status(HttpStatus.OK).body(detailCommentDto);
+
+        } else {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+
+        }
+//        Optional<Comment> optionalComment = commentRepository.findById(id);
+//
+//        if (optionalComment.isPresent()) {
+//            Comment comment = optionalComment.get();
+//            CommentDto detailCommentDto = new CommentDto();
+//            detailCommentDto.setUsername(comment.getUsername());
+//            detailCommentDto.setContent(comment.getContent());
+//
+//            return ResponseEntity.status(HttpStatus.OK).body(detailCommentDto);
+//
+//        } else {
+//            CommentDto errorDto = new CommentDto();
+//            errorDto.setUsername("댓글이 존재하지 않습니다.");
+//
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
+//        }
     }
 
     // 댓글 수정
-    public Comment updateComment(Long id, CommentDto commentDto) {
+    // Optionam 사용 error메시지 Dto에 할당 후 보여줌
+    @Override
+    public ResponseEntity<CommentDto> updateComment(Long id, CommentDto commentDto) {
 
-        Comment comment = detailOne(id);
-        comment.setUsername(commentDto.getUsername());
-        comment.setContent(commentDto.getContent());
+        Optional<Comment> optionalComment1 = commentRepository.findById(id);
 
-        return commentRepository.save(comment);
+        if (optionalComment1.isPresent()) {
+            Comment comment = optionalComment1.get();
+            comment.setUsername(commentDto.getUsername());
+            comment.setContent(commentDto.getContent());
+            commentRepository.save(comment);
+
+            CommentDto updateComentDto = new CommentDto();
+
+            updateComentDto.setUsername(comment.getUsername());
+            updateComentDto.setContent(comment.getContent());
+
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(updateComentDto);
+
+        } else {
+            CommentDto errorDto = new CommentDto();
+            errorDto.setUsername("수정이 완료되지 않았습니다.");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
+
+        }
 
     }
 
     @Override
-    public String deleteComment(Long id) {
+    public ResponseEntity<Void> deleteComment(Long id) {
 
-        return "삭제가 완료 되었습니다.";
+        if (commentRepository.existsById(id)) {
+            commentRepository.deleteById(id);
 
+            return ResponseEntity.noContent().build();
+
+        } else {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+        }
     }
 }
