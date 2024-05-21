@@ -141,7 +141,6 @@ public class MovieServiceImplement implements MovieService {
                     }
                 }
             }
-
         }
 
         movieRepository.saveAll(nowPlayingMovieList);

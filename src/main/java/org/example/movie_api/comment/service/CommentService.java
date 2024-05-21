@@ -3,10 +3,11 @@ package org.example.movie_api.comment.service;
 
 import org.example.movie_api.comment.dto.CommentDto;
 import org.example.movie_api.comment.entity.Comment;
+import org.springframework.http.ResponseEntity;
 
 public interface CommentService {
 
-    Comment saveComment(CommentDto commentDto);
+    ResponseEntity<CommentDto> saveComment(CommentDto commentDto);
     // 댓글 작성
 
     Comment detailOne(Long id);

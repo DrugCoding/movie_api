@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.example.movie_api.comment.service.CommentService;
 import org.example.movie_api.comment.dto.CommentDto;
 import org.example.movie_api.comment.entity.Comment;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -16,13 +17,13 @@ public class CommentController {
     private final CommentService commentService;
 
 
-    // entity로 반환하지 말라는게 어떤건지?
+    // entity로 반환?
     // 예외처리 예상 : 작성 시 권한 확인할때, 확인 시 글 없을때, 수정 시 글 없을때, 삭제 시 없을 때
 
 
     // 댓글 작성
     @PostMapping("/create")
-    public Comment createComment(@RequestBody CommentDto commentDto) {
+    public ResponseEntity<CommentDto> createComment(@RequestBody CommentDto commentDto) {
 
         return commentService.saveComment(commentDto);
 

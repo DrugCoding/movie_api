@@ -5,6 +5,8 @@ import org.example.movie_api.comment.dto.CommentDto;
 import org.example.movie_api.comment.entity.Comment;
 import org.example.movie_api.comment.repository.CommentRepository;
 import org.example.movie_api.comment.service.CommentService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
@@ -15,13 +17,20 @@ public class CommentServiceImplement implements CommentService {
     private final CommentRepository commentRepository;
 
     // 댓글 작성
-    public Comment saveComment(CommentDto commentDto) {
+    @Override
+    public ResponseEntity<CommentDto> saveComment(CommentDto commentDto) {
 
         Comment comment = new Comment();
         comment.setUsername(commentDto.getUsername());
         comment.setContent(commentDto.getContent());
 
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        CommentDto savedCommentDto = new CommentDto();
+        savedCommentDto.setUsername(savedComment.getUsername());
+        savedCommentDto.setContent(savedComment.getContent());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCommentDto);
 
     }
 
